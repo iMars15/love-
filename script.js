@@ -14,8 +14,16 @@ const drops = Array.from({length: columns}, () => Math.floor(Math.random() * -10
 
 let heartScale = 0;
 const targetHeartScale = 18; 
-let hue = 0;
 let isActivated = false;
+
+// Безопасная палитра фиксированных цветов, которая не ломает браузер Telegram на iOS
+const colors = [
+    '#ff3366', '#ff33cc', '#ff33ff', '#cc33ff', 
+    '#6633ff', '#3333ff', '#3366ff', '#33ccff', 
+    '#33ffff', '#33ffcc', '#ffcc33', '#ff6633'
+];
+let colorIndex = 0;
+let colorTimer = 0;
 
 function inHeart(x, y, centerX, centerY, scale) {
     if (scale === 0) return false;
@@ -31,8 +39,6 @@ function drawMatrix() {
     ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    ctx.font = 'bold ' + fontSize + 'px monospace';
-
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2 - 40;
 
@@ -40,7 +46,11 @@ function drawMatrix() {
         if (heartScale < targetHeartScale) {
             heartScale += 0.12;
         }
-        hue = (hue + 1.5) % 360;
+        // Плавная смена индекса цвета без насилия над GPU
+        colorTimer++;
+        if (colorTimer % 4 === 0) {
+            colorIndex = (colorIndex + 1) % colors.length;
+        }
     }
 
     for (let i = 0; i < drops.length; i++) {
@@ -52,15 +62,14 @@ function drawMatrix() {
             const text = Math.random() > 0.5 ? "1" : "0";
 
             if (inside) {
-                ctx.fillStyle = `hsl(${hue}, 100%, 60%)`;
-                ctx.shadowColor = `hsl(${hue}, 100%, 50%)`;
-                ctx.shadowBlur = 4;
+                ctx.font = 'bold ' + fontSize + 'px monospace';
+                ctx.fillStyle = colors[colorIndex];
+                ctx.fillText(text, x, y);
             } else {
+                ctx.font = 'bold ' + fontSize + 'px monospace';
                 ctx.fillStyle = '#2d0000';
-                ctx.shadowBlur = 0;
+                ctx.fillText(text, x, y);
             }
-
-            ctx.fillText(text, x, y);
         }
 
         if (y > canvas.height && Math.random() > 0.95) {
@@ -77,16 +86,16 @@ const phrases = [
     "我爱你", "Te amo", "Je t'aime", "Ich liebe dich", "Ti amo", "愛してる", "사랑해", 
     "Eu te amo", "أنا أحبك", "मैं तुमसे प्यार करता हूँ", "Main tumse pyar karta hoon", 
     "Seni seviyorum", "Ek is lief vir jou", "Unë të dua", "Я цябе кахаю", "Я тебя люблю", 
-    "I love you", "Ես քеզ սիրում եմ", "আমি তোমায় ভালোবাসি", "Volim te", "Обичам те", 
+    "I love you", "Ես քեզ սիրում եմ", "আমি তোমায় ভালোবাসি", "Volim te", "Обичам те", 
     "Estimo molt", "Gihigugma tika", "Ndimakukonda", "Tá grá agam duit", "Volim te", 
     "Miluji tě", "Jeg elsker dig", "Ik hou van jou", "Mi amas vin", "Ma armastan sind", 
     "Jag älskar dig", "Mahal kita", "Minä rakastan sinua", "S'agapo", "Je t'aimé", 
-    "אני אוهב אותך", "मैं तुझसे प्रेम करतो", "Kuv hlub koj", "Szeretlek", "Ég elska þig", 
+    "אני אוهב אותך", "मैं तुझсе प्रेम करतो", "Kuv hlub koj", "Szeretlek", "Ég elska þig", 
     "Aku cinta kamu", "Ṇdị m hụrụ gị n'anya", "Gràdhaim thu", "Ti voglio bene", "愛你", 
     "Ес сени суюм", "Nakupenda", "Kocham cię", "Eu te iubesc", "Я тебе люблю", "Volim te", 
     "Milujem ťa", "Rad te imam", "Waan ku jeclahay", "Ngiyakuthanda", "Te quiero", 
     "Aku sayang engkau", "നിന്നെ ഞാൻ പ്രേമിക്കുന്നു", "Jeg elsker deg", "Ek het jou lief", 
-    "Мен сени сүйөм", "Би тэмд хайртай", "म तिमीलाई माया गर्छु", "دوستت دارم", "Kocham cie", 
+    "Мен сени сүйөм", "Би тэмд хайртай", "म तिमीलाई মায়ा गर्छु", "دوستت دارم", "Kocham cie", 
     "Aroha ahau ki a koe", "Ke a go rata", "Ndinokuda", "Mahal kita", "நான் உன்னை காதலிக்கிறேன்", 
     "నేను నిన్ను ప్రేమిస్తున్నాను", "ฉันรักคุณ", "Seni seviyorum", "Я люблю тебе", 
     "Men seni söýýärin", "Я люблю тебе", "Men seni sevaman", "Anh yêu em", "Rwy'n dy garu di", 
