@@ -16,7 +16,6 @@ let heartScale = 0;
 const targetHeartScale = 18; 
 let isActivated = false;
 
-// Безопасная палитра фиксированных цветов, которая не ломает браузер Telegram на iOS
 const colors = [
     '#ff3366', '#ff33cc', '#ff33ff', '#cc33ff', 
     '#6633ff', '#3333ff', '#3366ff', '#33ccff', 
@@ -46,7 +45,6 @@ function drawMatrix() {
         if (heartScale < targetHeartScale) {
             heartScale += 0.12;
         }
-        // Плавная смена индекса цвета без насилия над GPU
         colorTimer++;
         if (colorTimer % 4 === 0) {
             colorIndex = (colorIndex + 1) % colors.length;
